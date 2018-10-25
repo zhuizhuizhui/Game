@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>贪吃蛇</title>
+	<style type="text/css">
+		canvas{
+			display: block;
+			margin: 40px auto;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="400" height="400"></canvas>
+	<script type="text/javascript">
+		/*小蛇坐标 果子坐标 小蛇方向 小蛇初始长度
+		* 填充画布
+		* 按键事件响应
+		* 遇到边界处理
+		* 撞到尾巴处理
+		* 吃到苹果处理  增加长度处理
+		*/
+		let canvas=document.getElementById('canvas'),
+			ctx=canvas.getContext('2d'),
+			w=canvas.width,
+			h=canvas.height,
+			appleX=appleY=5,
+			snakeX=snakeY=9,
+			speedX=speedY=0,
+			vx=vy=0,
+			size=step=20,//划分20份,每份大小size20 xy轴step20
+			tail=[],
+			len=3;
+
+		document.addEventListener('keydown',keyPush)
+		function keyPush(e){
+			switch(e.keyCode){
+				case 37://left
+					vx=-1,vy=0;
+					break;
+				case 38://up
+					vx=0,vy=-1;
+					break;
+				case 39://right
+					vx=1,vy=0;
+					break;
+				case 40://down
+					vx=0,vy=1;
+					break;
+			}
+		}	
+		function draw(x,y,w,h,color){
+			ctx.fillStyle=color;
+			ctx.fillRect(x*size,y*size,w,h);
+		}
+		function randomRange(){
+			return ~~(Math.random()*20);							
+		}
+		let game={
+			init(){
+				//添加背景
+				draw(0,0,w,h,'black');
+				//添加果子
+				draw(appleX,appleY,size,size,'red');		
+				//添加蛇
+				draw(snakeX,snakeY,size,size,'lime');
+			},
+			snake_tail(){
+				//方向处理
+				snakeX+=vx;
+				snakeY+=vy;
+				//吃住果子处理
+				if(snakeX==appleX&&snakeY==appleY){
+					len++;
+					appleX=randomRange();
+					appleY=randomRange();
+				}
+				//触碰边界处理
+				if(snakeX>=20)snakeX=0;
+				if(snakeX<0)snakeX=20;
+
+				if(snakeY>=20)snakeY=0;
+				if(snakeY<0)snakeY=20;
+				//填充尾部
+				for(let i=0;i<tail.length;i++){
+					draw(tail[i].x,tail[i].y,size-1,size-1,'lime');
+					if(tail[i].x==snakeX&&tail[i].y==snakeY)
+						len=3;						
+				}
+				//追加尾部坐标
+				tail.push({x:snakeX,y:snakeY});
+				//尾部处理 存储长度大于吃住len(吃住果子长度+初始长度)
+				while(tail.length>len)
+					tail.shift();					
+			}
+		}
+
+		setInterval(()=>{			
+			ctx.clearRect(0,0,w,h);
+			game.init();
+			game.snake_tail();
+		},1000/15)
+	</script>
+</body>
+</html>
